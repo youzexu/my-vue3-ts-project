@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>练习</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #ffffff;
+            display: flex;
+            justify-content: center;
+            max-height: 100vh;
+            margin: 0;
+        }
+
+        .todo-app {
+            width: 100%;
+            max-width: 500px;
+            background: rgb(242, 240, 240);
+            border-radius: 7px;
+            padding: 24px;
+            border: 1px solid #cecccc;
+        }
+
+        h1 {
+            font-size: 30px;
+            font-weight: 400;
+            margin-top: 0;
+            margin-bottom: 24px;
+            margin-left: 140px;
+            color: #1e293b;
+        }
+
+        .todo-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 20px 0;
+            background-color: white;
+            border-radius: 7px;
+            border: 1px solid #cecccc;
+        }
+
+        .todo-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            padding-left: 10px;
+            border-bottom: 1px solid #cecccc;
+
+        }
+
+        .todo-item:last-child {
+            border-bottom: none;
+        }
+
+        .todo-check {
+            margin-right: 12px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #3b82f6;
+        }
+
+        .todo-text {
+            flex: 1;
+            font-size: 15px;
+            color: #0f172a;
+        }
+
+        .completed .todo-text {
+            text-decoration: line-through;
+            color: #94a3b8;
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #111111;
+            font-size: 14px;
+            padding: 6px 10px;
+            border-radius: 10px;
+        }
+
+        .stats {
+            background: white;
+            border-radius: 7px;
+            padding: 12px 16px;
+            margin: 20px 0 24px 0;
+            font-size: 14px;
+            font-weight: 500;
+            color: #334155;
+            border: 1px solid #c1c0c0;
+        }
+
+        .add-section {
+            display: flex;
+            gap: 8px;
+        }
+
+        .add-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #c1c0c0;
+            border-radius: 7px;
+            font-size: 15px;
+            outline: none;
+            height: 30px;
+        }
+
+        .add-input:focus {
+            border-color: #3b82f6;
+        }
+
+        .save-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            width: 100px;
+            height: 30px;
+        }
+
+        .save-btn:hover {
+            background: #2563eb;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="todo-app">
+        <h1> React Todo</h1>
+        <ul class="todo-list" id="todoList"></ul>
+        <div class="stats" id="stats">
+            <span id="completedCount">0</span>已完成 / <span id="totalCount">3</span>总数
+        </div>
+        <div class="add-section">
+            <label for="">task</label>
+            <input type="text" class="add-input" id="newTaskInput" placeholder="你想做点什么" autocomplete="off">
+            <button class="save-btn" id="saveTaskBtn">Save Task</button>
+        </div>
+    </div>
+    <script>
+        (function () {
+            let todos = [
+                { id: '1', text: '睡觉', completed: false },
+                { id: '2', text: '打豆豆', completed: false },
+                { id: '3', text: '吃饭', completed: false },
+                { id: '4', text: 'wand', completed: false }
+            ];
+            const todoListEl = document.getElementById('todoList');
+            const completedSpan = document.getElementById('completedCount');
+            const totalSpan = document.getElementById('totalCount');
+            const newInput = document.getElementById('newTaskInput');
+            const saveBtn = document.getElementById('saveTaskBtn');
+
+            function generateId() {
+                return Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+            }
+            function render() {
+                todoListEl.innerHTML = '';
+                todos.forEach(todo => {
+                    const li = document.createElement('li');
+                    li.className = 'todo-item' + (todo.completed ? ' completed' : '');
+                    li.dataset.id = todo.id;
+
+                    const chk = document.createElement('input');
+                    chk.type = 'checkbox';
+                    chk.className = 'todo-check';
+                    chk.checked = todo.completed;
+                    chk.addEventListener('change', (e) => {
+                        todo.completed = e.target.checked;
+                        render();
+                    });
+
+                    const span = document.createElement('span');
+                    span.className = 'todo-text';
+                    span.textContent = todo.text;
+
+                    const delBtn = document.createElement('button');
+                    delBtn.className = 'delete-btn';
+                    delBtn.textContent = '删除';
+                    delBtn.addEventListener('click', () => {
+                        todos = todos.filter(t => t.id !== todo.id);
+                        render();
+                    });
+
+                    li.appendChild(chk);
+                    li.appendChild(span);
+                    li.appendChild(delBtn);
+                    todoListEl.appendChild(li);
+                });
+
+                const completed = todos.filter(t => t.completed).length;
+                const total = todos.length;
+                completedSpan.textContent = completed;
+                totalSpan.textContent = total;
+            }
+
+            function addNewTask() {
+                const text = newInput.value.trim();
+                if (text === '') {
+                    alert('任务内容不能为空');
+                    return;
+                }
+                const newTodo = {
+                    id: generateId(),
+                    text: text,
+                    completed: false
+                };
+                todos.push(newTodo);
+                render();
+                newInput.value = '';
+                newInput.focus();
+            }
+
+            saveBtn.addEventListener('click', addNewTask);
+            newInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    addNewTask();
+                }
+            });
+            render();
+        })();
+    </script>
+</body>
+
+</html>
